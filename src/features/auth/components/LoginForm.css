@@ -1,0 +1,112 @@
+src/features/auth/components/LoginForm.css
+
+.login-form {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #EEF2F6;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.lf-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.lf-logo-icon {
+  font-size: 26px;
+  background: #0F6E56;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lf-logo-text {
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.lf-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.4px;
+  margin-bottom: 0;
+}
+
+.lf-sub {
+  font-size: 14px;
+  color: #6B7280;
+  margin-top: -10px;
+}
+
+.lf-error {
+  background: #FEF2F2;
+  color: #DC2626;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #FCA5A5;
+}
+
+.lf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lf-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.lf-field input {
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.15s;
+  background: #F9FAFB;
+}
+
+.lf-field input:focus {
+  border-color: #0F6E56;
+  background: #fff;
+}
+
+.lf-btn {
+  width: 100%;
+  padding: 13px;
+  background: #0F6E56;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 4px;
+}
+
+.lf-btn:hover {
+  background: #0a5240;
+}
+
+.lf-btn:disabled {
+  background: #9CA3AF;
+  cursor: not-allowed;
+}

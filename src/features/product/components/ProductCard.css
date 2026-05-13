@@ -1,0 +1,163 @@
+/* src/features/products/components/ProductCard.css */
+
+.pcard {
+  background: #fff;
+  border-radius: 16px;
+  border: 1.5px solid #EEF2F6;
+  padding: 14px;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pcard:hover {
+  border-color: #0F6E56;
+  transform: translateY(-2px);
+}
+
+.pcard--selected {
+  border-color: #0F6E56;
+  background: #F0FDF4;
+}
+
+.pcard--oos {
+  opacity: 0.7;
+}
+
+/* fav button */
+.pcard-fav {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #9CA3AF;
+  transition: color 0.15s;
+  z-index: 1;
+}
+
+.pcard-fav:hover {
+  color: #EF4444;
+  border-color: #FCA5A5;
+}
+
+/* discount badge */
+.pcard-discount {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #FEF2F2;
+  color: #DC2626;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  z-index: 1;
+}
+
+/* image */
+.pcard-img-wrap {
+  width: 100%;
+  height: 130px;
+  background: #FDF8F0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.pcard-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.pcard-oos-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+/* info */
+.pcard-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pcard-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.pcard-stock {
+  font-size: 12px;
+  color: #9CA3AF;
+}
+
+/* price row */
+.pcard-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pcard-price {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0F6E56;
+}
+
+.pcard-original {
+  font-size: 11px;
+  color: #9CA3AF;
+  text-decoration: line-through;
+  margin-left: 5px;
+}
+
+.pcard-add {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0F6E56;
+  color: #fff;
+  border: none;
+  font-size: 18px;
+  font-weight: 400;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.pcard-add:hover {
+  background: #0a5240;
+}
+
+.pcard-add:disabled {
+  background: #D1D5DB;
+  cursor: not-allowed;
+}

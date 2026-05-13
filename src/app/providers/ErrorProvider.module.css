@@ -1,0 +1,26 @@
+/* app/providers/ErrorProvider.module.css */
+
+.overlay {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 9999; width: 100%; max-width: 520px; padding: 0 16px;
+  animation: slideDown 0.25s ease;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.banner {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; padding: 14px 16px; border-radius: 10px;
+  border: 1.5px solid transparent; box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+.banner.error   { background-color: #fef2f2; border-color: #fecaca; }
+.banner.warning { background-color: #fffbeb; border-color: #fde68a; }
+.left    { display: flex; gap: 10px; align-items: flex-start; }
+.icon    { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+.message { font-size: 14px; font-weight: 600; margin: 0; }
+.message.errorText   { color: #991b1b; }
+.message.warningText { color: #92400e; }
+.sub     { font-size: 12px; color: #9ca3af; margin: 2px 0 0; }
+.closeBtn { background: none; border: none; cursor: pointer; font-size: 14px; color: #9ca3af; padding: 0; flex-shrink: 0; }
+.closeBtn:hover { color: #6b7280; }
