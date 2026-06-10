@@ -7,13 +7,24 @@ import './ProductFormModal.css';
 const EMPTY_FORM = {
   name: '',
   description: '',
-  sku: '',
-  price: 0,
-  quantity: 0,
-  unit: 'pcs',
   category: '',
+  tags: [],
   images: [],
-  stockThreshold: 10,
+  featured: false,
+  isActive: true,
+  discountPercentage: 0,
+  
+  variants: [
+    {
+      unit: 'pcs',
+      price: 0,
+      quantity: 0,
+      sku: '',
+      minOrderQuantity: 1,
+      bulkPrice: 0,
+      stockThreshold: 10,
+    },
+  ],
 };
 
 export function ProductFormModal({ mode, product, onClose }) {
@@ -32,16 +43,29 @@ export function ProductFormModal({ mode, product, onClose }) {
 
   useEffect(() => {
     if (mode === 'edit' && product) {
+      const variant = product.variants?.[0] ?? {};
       setForm({
-        name:           product.name,
-        description:    product.description ?? '',
-        sku:            product.sku,
-        price:          product.price,
-        quantity:       product.quantity,
-        unit:           product.unit,
-        category:       product.category,
-        images:         product.images ?? [],
-        stockThreshold: product.stockThreshold,
+        name:              product.name,
+        description:       product.description ?? '',
+        category:          product.category,
+        tags:              product.tags ?? [],
+        images:            product.images ?? [],
+        featured:          product.featured ?? false,
+        isActive:          product.isActive ?? true,
+        discountPercentage: product.discountPercentage ?? 0,
+       
+       
+        variants: [
+          {
+            unit:             variant.unit ?? 'pcs',
+            price:            variant.price ?? 0,
+            quantity:         variant.quantity ?? 0,
+            sku:              variant.sku ?? '',
+            minOrderQuantity: variant.minOrderQuantity ?? 1,
+            bulkPrice:        variant.bulkPrice ?? 0,
+            stockThreshold:   variant.stockThreshold ?? 10,
+          },
+        ],
       });
       if (product.images?.length) {
         setPreviews(
@@ -119,11 +143,16 @@ export function ProductFormModal({ mode, product, onClose }) {
 
   const validate = () => {
     const e = {};
-    if (!form.name.trim())     e.name     = 'Name is required';
-    if (!form.sku.trim())      e.sku      = 'SKU is required';
-    if (form.price <= 0)       e.price    = 'Price must be greater than 0';
-    if (form.quantity < 0)     e.quantity = 'Quantity cannot be negative';
-    if (!form.category.trim()) e.category = 'Category is required';
+    const variant = form.variants?.[0] ?? {};
+
+    if (!form.name.trim())                    e.name = 'Name is required';
+    if (!form.category.trim())                e.category = 'Category is required';
+    if (variant.price <= 0)                   e.variantPrice = 'Price must be greater than 0';
+    if (variant.quantity < 0)                 e.variantQuantity = 'Quantity cannot be negative';
+    if (!variant.unit?.trim())                e.variantUnit = 'Unit is required';
+    if (variant.minOrderQuantity < 1)         e.variantMOQ = 'MOQ must be at least 1';
+    if (variant.stockThreshold < 0)           e.variantStockThreshold = 'Threshold cannot be negative';
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -131,6 +160,24 @@ export function ProductFormModal({ mode, product, onClose }) {
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
+  const handleVariantChange = (field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      variants: [
+        {
+          ...prev.variants[0],
+          [field]: value,
+        },
+      ],
+    }));
+    if (errors[`variant${field.charAt(0).toUpperCase()}${field.slice(1)}`]) {
+      setErrors((prev) => ({
+        ...prev,
+        [`variant${field.charAt(0).toUpperCase()}${field.slice(1)}`]: undefined,
+      }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -226,7 +273,6 @@ export function ProductFormModal({ mode, product, onClose }) {
             )}
           </div>
 
-          {/* Name + SKU */}
           <div className="pfm-row">
             <Field label="Product Name" error={errors.name} required>
               <input
@@ -236,13 +282,22 @@ export function ProductFormModal({ mode, product, onClose }) {
                 onChange={(e) => handleChange('name', e.target.value)}
               />
             </Field>
-            <Field label="SKU" error={errors.sku} required>
-              <input
-                className={'pfm-input' + (errors.sku ? ' pfm-input--error' : '')}
-                placeholder="Auto-generated if empty"
-                value={form.sku}
-                onChange={(e) => handleChange('sku', e.target.value)}
-              />
+            <Field label="Category" error={errors.category} required>
+              <select
+                className="pfm-input pfm-select"
+                value={form.category}
+                onChange={(e) => handleChange('category', e.target.value)}
+              >
+                <option value="">Select Category</option>
+                <option value="liter">liter</option>
+                <option value="frozen">frozen</option>
+                <option value="nuts">nuts</option>
+                <option value="dairy">dairy</option>
+                <option value="beverages">beverages</option>
+                <option value="snacks">snacks</option>
+                <option value="grains">grains</option>
+                <option value="other">other</option>
+              </select>
             </Field>
           </div>
 
@@ -257,68 +312,95 @@ export function ProductFormModal({ mode, product, onClose }) {
             />
           </Field>
 
-          {/* Price + Quantity + Unit */}
-          <div className="pfm-row pfm-row--3">
-            <Field label="Price ($)" error={errors.price} required>
-              <input
-                className={'pfm-input' + (errors.price ? ' pfm-input--error' : '')}
-                type="number" min="0" step="0.01" placeholder="0.00"
-                value={form.price || ''}
-                onChange={(e) => handleChange('price', parseFloat(e.target.value) || 0)}
-              />
-            </Field>
-            <Field label="Quantity" error={errors.quantity} required>
-              <input
-                className={'pfm-input' + (errors.quantity ? ' pfm-input--error' : '')}
-                type="number" min="0" placeholder="0"
-                value={form.quantity || ''}
-                onChange={(e) => handleChange('quantity', parseInt(e.target.value) || 0)}
-              />
-            </Field>
-            <Field label="Unit" required>
-              <select
-                className="pfm-input pfm-select"
-                value={form.unit}
-                onChange={(e) => handleChange('unit', e.target.value)}
-              >
-                <option value="pcs">pcs</option>
-                <option value="kg">kg</option>
-                <option value="g">g</option>
-                <option value="L">L</option>
-                <option value="ml">ml</option>
-                <option value="pack">pack</option>
-                <option value="dozen">dozen</option>
-                <option value="box">box</option>
-              </select>
-            </Field>
+          <div className="pfm-field">
+            <label className="pfm-label">Primary Variant</label>
+            <div className="pfm-row pfm-row--3">
+              <Field label="Unit" error={errors.variantUnit} required>
+                <select
+                  className={'pfm-input pfm-select' + (errors.variantUnit ? ' pfm-input--error' : '')}
+                  value={form.variants[0].unit}
+                  onChange={(e) => handleVariantChange('unit', e.target.value)}
+                >
+                  <option value="pcs">pcs</option>
+                  <option value="kg">kg</option>
+                  <option value="g">g</option>
+                  <option value="L">L</option>
+                  <option value="ml">ml</option>
+                  <option value="pack">pack</option>
+                  <option value="dozen">dozen</option>
+                  <option value="box">box</option>
+                </select>
+              </Field>
+              <Field label="Price ($)" error={errors.variantPrice} required>
+                <input
+                  className={'pfm-input' + (errors.variantPrice ? ' pfm-input--error' : '')}
+                  type="number" min="0" step="0.01" placeholder="0.00"
+                  value={form.variants[0].price || ''}
+                  onChange={(e) => handleVariantChange('price', parseFloat(e.target.value) || 0)}
+                />
+              </Field>
+              <Field label="Quantity" error={errors.variantQuantity} required>
+                <input
+                  className={'pfm-input' + (errors.variantQuantity ? ' pfm-input--error' : '')}
+                  type="number" min="0" placeholder="0"
+                  value={form.variants[0].quantity || ''}
+                  onChange={(e) => handleVariantChange('quantity', parseInt(e.target.value) || 0)}
+                />
+              </Field>
+            </div>
+            <div className="pfm-row pfm-row--3">
+              <Field label="SKU" error={errors.variantSku}>
+                <input
+                  className={'pfm-input' + (errors.variantSku ? ' pfm-input--error' : '')}
+                  placeholder="Auto-generated if empty"
+                  value={form.variants[0].sku}
+                  onChange={(e) => handleVariantChange('sku', e.target.value)}
+                />
+              </Field>
+              <Field label="MOQ" error={errors.variantMOQ}>
+                <input
+                  className={'pfm-input' + (errors.variantMOQ ? ' pfm-input--error' : '')}
+                  type="number" min="1" placeholder="1"
+                  value={form.variants[0].minOrderQuantity || ''}
+                  onChange={(e) => handleVariantChange('minOrderQuantity', parseInt(e.target.value) || 1)}
+                />
+              </Field>
+              <Field label="Bulk Price">
+                <input
+                  className="pfm-input"
+                  type="number" min="0" step="0.01" placeholder="0.00"
+                  value={form.variants[0].bulkPrice || ''}
+                  onChange={(e) => handleVariantChange('bulkPrice', parseFloat(e.target.value) || 0)}
+                />
+              </Field>
+            </div>
+            <div className="pfm-row">
+              <Field label="Low Stock Threshold" error={errors.variantStockThreshold}>
+                <input
+                  className={'pfm-input' + (errors.variantStockThreshold ? ' pfm-input--error' : '')}
+                  type="number" min="0" placeholder="10"
+                  value={form.variants[0].stockThreshold || ''}
+                  onChange={(e) => handleVariantChange('stockThreshold', parseInt(e.target.value) || 0)}
+                />
+              </Field>
+            </div>
           </div>
 
-          {/* Category + Stock Threshold */}
           <div className="pfm-row">
-           <Field label="Category" error={errors.category} required>
-              <select
-                className="pfm-input pfm-select"
-                value={form.category}
-                onChange={(e) => handleChange('category', e.target.value)}
-              >
-                <option value="">Select Category</option>
-
-                <option value="liter">liter</option>
-                <option value="frozen">frozen</option>
-                <option value="nuts">nuts</option>
-                <option value="dairy">dairy</option>
-                <option value="beverages">beverages</option>
-                <option value="snacks">snacks</option>
-                <option value="grains">grains</option>
-                <option value="other">other</option>
-              </select>
-            </Field>
-            <Field label="Low Stock Threshold">
+            <Field label="Tags">
               <input
                 className="pfm-input"
-                type="number" min="0" placeholder="10"
-                value={form.stockThreshold || ''}
-                onChange={(e) => handleChange('stockThreshold', parseInt(e.target.value) || 0)}
+                placeholder="Comma separated tags"
+                value={form.tags.join(', ')}
+                onChange={(e) => handleChange('tags', e.target.value.split(',').map((tag) => tag.trim()).filter(Boolean))}
+              />
+            </Field>
+            <Field label="Discount (%)">
+              <input
+                className="pfm-input"
+                type="number" min="0" max="100" placeholder="0"
+                value={form.discountPercentage || ''}
+                onChange={(e) => handleChange('discountPercentage', parseFloat(e.target.value) || 0)}
               />
             </Field>
           </div>

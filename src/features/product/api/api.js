@@ -25,10 +25,15 @@ export const productApi = {
     return data;
   },
 
-  update: async (id, payload) => {
+update: async (id, payload) => {
+  try {
     const { data } = await apiClient.put(`/products/${id}`, payload);
     return data;
-  },
+  } catch (error) {
+    console.log('UPDATE ERROR:', error.response?.data);
+    throw error;
+  }
+},
 
   deactivate: async (id) => {
     const { data } = await apiClient.patch(`/products/${id}/deactivate`);

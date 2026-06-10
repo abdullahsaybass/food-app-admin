@@ -40,6 +40,10 @@ export default function ProductListPage() {
     return [ALL_CATEGORY, ...Array.from(cats)];
   }, [products]);
 
+  const getPrimaryVariant = (product) => product.variants?.[0] ?? {};
+  const getTotalStock = (product) =>
+    product.totalStock ?? (product.variants ?? []).reduce((sum, variant) => sum + (variant.quantity ?? 0), 0);
+
   const handleCategoryChange = (cat) => {
     setCategory(cat);
     setPage(1);
@@ -168,15 +172,15 @@ export default function ProductListPage() {
                           </div>
                           <div>
                             <p className="plp-product-name">{product.name}</p>
-                            <p className="plp-product-sku">SKU: #{product.sku}</p>
+                            <p className="plp-product-sku">SKU: #{getPrimaryVariant(product).sku ?? 'N/A'}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="plp-price">${product.price.toFixed(2)}</td>
-                      <td className="plp-sku">{product.sku}</td>
+                      <td className="plp-price">${(getPrimaryVariant(product).price ?? 0).toFixed(2)}</td>
+                      <td className="plp-sku">{getPrimaryVariant(product).sku ?? 'N/A'}</td>
                       <td>
                         <span className={`plp-qty ${product.isLowStock ? 'plp-qty--low' : ''}`}>
-                          {product.quantity} {product.unit}
+                          {getTotalStock(product)} {getPrimaryVariant(product).unit ?? 'pcs'}
                           {product.isLowStock && <span className="plp-low-badge">Low</span>}
                         </span>
                       </td>

@@ -1,55 +1,120 @@
-// src/features/auth/hooks/useAuth.js
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginRequest, logoutRequest } from '../api/auth.api';
+
+import {
+  loginRequest,
+  logoutRequest,
+} from '../api/auth.api';
+
 import { useAuthStore } from '../../../store/auth.store';
 
 export function useAuth() {
-  const { setAuth, logout, token, user } = useAuthStore();
+  const {
+    setAuth,
+    logout,
+    token,
+    user,
+  } = useAuthStore();
+
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] =
+    useState(false);
 
-  const login = async ({ email, password }) => {
+  const [error, setError] =
+    useState(null);
+
+  const login = async ({
+    email,
+    password,
+  }) => {
     setError(null);
 
     try {
       setLoading(true);
 
-      const data = await loginRequest({ email, password });
+      const response =
+        await loginRequest({
+          email,
+          password,
+        });
 
-      if (!data?.token || !data?.user) {
-        setError('Invalid email or password');
+      console.log(
+        'LOGIN RESPONSE:',
+        response,
+      );
+
+      // IMPORTANT FIX
+      const accessToken =
+        response?.data?.accessToken;
+
+      const userData =
+        response?.data?.user;
+
+      if (
+        !accessToken ||
+        !userData
+      ) {
+        setError(
+          'Invalid email or password',
+        );
+
         return;
       }
 
-      // restrict to admin
-      if (!['admin', 'superadmin'].includes(data.user.role)) {
-        setError('Access denied');
+      // ADMIN CHECK
+      if (
+        ![
+          'admin',
+          'superadmin',
+        ].includes(userData.role)
+      ) {
+        setError(
+          'Access denied',
+        );
+
         return;
       }
 
-      setAuth(data.token, data.user);
+      // STORE AUTH
+      setAuth(
+        accessToken,
+        userData,
+      );
 
-      navigate('/admin/products', { replace: true });
-
+      // NAVIGATE
+      navigate(
+        '/admin/products',
+        {
+          replace: true,
+        },
+      );
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid email or password');
+      console.log(
+        'LOGIN ERROR:',
+        err,
+      );
+
+      setError(
+        err?.response?.data
+          ?.message ||
+          'Invalid email or password',
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const logoutUser = async () => {
-    try {
-      await logoutRequest();
-    } catch (_) {}
+  const logoutUser =
+    async () => {
+      try {
+        await logoutRequest();
+      } catch (_) {}
 
-    logout();
-    navigate('/login');
-  };
+      logout();
+
+      navigate('/login');
+    };
 
   return {
     user,

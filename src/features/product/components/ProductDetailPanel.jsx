@@ -3,10 +3,12 @@
 import './ProductDetailPanel.css';
 
 export function ProductDetailPanel({ product, onClose, onEdit, onDeactivate, onDelete }) {
-  const stockPercent = Math.min(
-    100,
-    Math.round((product.quantity / (product.stockThreshold * 5)) * 100)
-  );
+  const primaryVariant = product.variants?.[0] ?? {};
+  const totalStock = product.totalStock ?? (product.variants ?? []).reduce((sum, variant) => sum + (variant.quantity ?? 0), 0);
+  const variantThreshold = primaryVariant.stockThreshold ?? 10;
+  const stockPercent = totalStock && variantThreshold > 0
+    ? Math.min(100, Math.round((totalStock / (variantThreshold * 5)) * 100))
+    : 0;
 
   const formatDate = (iso) =>
     new Date(iso).toLocaleDateString('en-US', {
@@ -28,14 +30,20 @@ export function ProductDetailPanel({ product, onClose, onEdit, onDeactivate, onD
 
       {/* Image */}
       <div className="pdp-img-wrap">
-        {product.images?.[0]
-          ? <img src={product.images[0]} alt={product.name} className="pdp-img" />
+       {product.images?.[0]?.url
+          ? (
+              <img
+                src={product.images[0].url}
+                alt={product.images[0].altText || product.name}
+                className="pdp-img"
+              />
+            )
           : (
-            <div className="pdp-img-placeholder">
-              <ImageIcon />
-              <span>No Image</span>
-            </div>
-          )
+              <div className="pdp-img-placeholder">
+                <ImageIcon />
+                <span>No Image</span>
+              </div>
+            )
         }
         <span className={`pdp-status-badge ${product.isActive ? 'pdp-status-badge--active' : 'pdp-status-badge--inactive'}`}>
           <span className="pdp-status-dot" />
@@ -50,15 +58,15 @@ export function ProductDetailPanel({ product, onClose, onEdit, onDeactivate, onD
         <div className="pdp-name-row">
           <div>
             <h2 className="pdp-name">{product.name}</h2>
-            <p className="pdp-sku">SKU: {product.sku}</p>
+            <p className="pdp-sku">SKU: {primaryVariant.sku ?? 'N/A'}</p>
           </div>
           <span className="pdp-category-tag">{product.category}</span>
         </div>
 
         {/* Price */}
         <div className="pdp-price-section">
-          <span className="pdp-price">${product.price.toFixed(2)}</span>
-          <span className="pdp-price-label">/ {product.unit}</span>
+          <span className="pdp-price">${(primaryVariant.price ?? 0).toFixed(2)}</span>
+          <span className="pdp-price-label">/ {primaryVariant.unit ?? 'pcs'}</span>
         </div>
 
         {/* Description */}
@@ -74,12 +82,12 @@ export function ProductDetailPanel({ product, onClose, onEdit, onDeactivate, onD
             <div className="pdp-stock-item">
               <span className="pdp-stock-label">Current Stock</span>
               <span className={`pdp-stock-value ${product.isLowStock ? 'pdp-stock-value--low' : ''}`}>
-                {product.quantity} {product.unit}
+                {totalStock} {primaryVariant.unit ?? 'pcs'}
               </span>
             </div>
             <div className="pdp-stock-item">
               <span className="pdp-stock-label">Low Stock Alert</span>
-              <span className="pdp-stock-value">{product.stockThreshold} {product.unit}</span>
+              <span className="pdp-stock-value">{variantThreshold} {primaryVariant.unit ?? 'pcs'}</span>
             </div>
           </div>
           <div className="pdp-stock-bar-wrap">
@@ -94,6 +102,26 @@ export function ProductDetailPanel({ product, onClose, onEdit, onDeactivate, onD
             )}
           </div>
         </div>
+
+        {product.variants?.length > 0 && (
+          <div className="pdp-section">
+            <h4 className="pdp-section-title">Variants</h4>
+            <div className="pdp-variants-grid">
+              {product.variants.map((variant, index) => (
+                <div key={variant.sku || `${variant.unit}-${index}`} className="pdp-variant-card">
+                  <div className="pdp-variant-row">
+                    <strong>{variant.unit}</strong>
+                    <span>${variant.price.toFixed(2)}</span>
+                  </div>
+                  <div className="pdp-variant-row">
+                    <span>{variant.quantity} in stock</span>
+                    <span>SKU: {variant.sku || 'N/A'}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Audit info */}
         <div className="pdp-section">

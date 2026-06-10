@@ -5,6 +5,7 @@ import AuthGuard from '../guards/AuthGuard';
 
 import AdminLayout from '../../shared/layout/AdminLayout';
 import LoginPage from '../../features/auth/pages/LoginPage';
+import DashboardPage from '../../features/dashboard/DashboardPage';
 import ProductListPage from '../../features/product/pages/ProductListPage';
 import UsersPage from '../../features/user/pages/UsersPage';
 import OrdersPage      from '../../features/order/pages/OrdersPage';
@@ -20,12 +21,11 @@ const router = createBrowserRouter([
       </AuthGuard>
     ),
     children: [
-      { index: true, element: <ProductListPage /> }, // 👈 default page
+      { index: true, element: <DashboardPage /> }, // 👈 Dashboard as default home
+      { path: 'products', element: <ProductListPage /> },
       { path: 'orders', element: <OrdersPage /> },
       { path: 'orders/:id', element: <OrderDetailPage /> },
-      { path: 'users', 
-    element: <UsersPage /> 
-  },
+      { path: 'users', element: <UsersPage /> },
     ],
   },
 

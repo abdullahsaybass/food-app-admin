@@ -7,6 +7,7 @@ const NAV_ITEMS = [
     label: 'Main',
     links: [
       { to: '/',            label: 'Overview',   icon: <OverviewIcon />, end: true },
+      { to: '/products',    label: 'Products',   icon: <ProductsIcon /> },
       { to: '/orders',      label: 'Orders',     icon: <OrderIcon />   },
       { to: '/favourites',  label: 'Favourite',  icon: <FavIcon />     },
       { to: '/categories',  label: 'Categories', icon: <CatIcon />     },
@@ -110,6 +111,13 @@ function OverviewIcon() {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
       <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+    </svg>
+  );
+}
+function ProductsIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
     </svg>
   );
 }

@@ -3,9 +3,22 @@
 import './ProductCard.css';
 
 export default function ProductCard({ product, isSelected, onClick }) {
-  const discount = Math.round(
-    ((product.originalPrice - product.price) / product.originalPrice) * 100
-  );
+  const variant = product.variants?.[0] ?? {};
+
+    const price = variant.price ?? 0;
+
+    const totalStock =
+      product.totalStock ??
+      (product.variants ?? []).reduce(
+        (sum, v) => sum + (v.quantity ?? 0),
+        0
+      );
+
+    const image = product.images?.[0]?.url;
+
+    const inStock = totalStock > 0;
+
+    const discount = product.discountPercentage ?? 0;
 
   return (
     <div
@@ -24,8 +37,16 @@ export default function ProductCard({ product, isSelected, onClick }) {
 
       {/* image */}
       <div className="pcard-img-wrap">
-        <img src={product.image} alt={product.name} className="pcard-img" />
-        {!product.inStock && <div className="pcard-oos-overlay">Out of Stock</div>}
+        <img
+          src={image}
+          alt={product.name}
+          className="pcard-img"
+        />
+        {!inStock && (
+          <div className="pcard-oos-overlay">
+            Out of Stock
+          </div>
+        )}
       </div>
 
       {/* info */}
