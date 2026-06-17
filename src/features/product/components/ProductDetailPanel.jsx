@@ -1,8 +1,11 @@
 // src/features/products/components/ProductDetailPanel.jsx
 
+import { useState } from 'react';
+import { StockManageModal } from './StockManageModal.jsx';
 import './ProductDetailPanel.css';
 
 export function ProductDetailPanel({ product, onClose, onEdit, onDeactivate, onDelete }) {
+  const [stockModalVariant, setStockModalVariant] = useState(null);
   const primaryVariant = product.variants?.[0] ?? {};
   const totalStock = product.totalStock ?? (product.variants ?? []).reduce((sum, variant) => sum + (variant.quantity ?? 0), 0);
   const variantThreshold = primaryVariant.stockThreshold ?? 10;
@@ -60,7 +63,7 @@ export function ProductDetailPanel({ product, onClose, onEdit, onDeactivate, onD
             <h2 className="pdp-name">{product.name}</h2>
             <p className="pdp-sku">SKU: {primaryVariant.sku ?? 'N/A'}</p>
           </div>
-          <span className="pdp-category-tag">{product.category}</span>
+          <span className="pdp-category-tag">{product.category?.name ?? 'Uncategorized'}</span>
         </div>
 
         {/* Price */}
@@ -117,6 +120,12 @@ export function ProductDetailPanel({ product, onClose, onEdit, onDeactivate, onD
                     <span>{variant.quantity} in stock</span>
                     <span>SKU: {variant.sku || 'N/A'}</span>
                   </div>
+                  <button
+                    className="pdp-variant-stock-btn"
+                    onClick={() => setStockModalVariant(variant)}
+                  >
+                    Manage Stock
+                  </button>
                 </div>
               ))}
             </div>
@@ -162,6 +171,14 @@ export function ProductDetailPanel({ product, onClose, onEdit, onDeactivate, onD
           <TrashIcon /> Delete
         </button>
       </div>
+
+      {stockModalVariant && (
+        <StockManageModal
+          product={product}
+          variant={stockModalVariant}
+          onClose={() => setStockModalVariant(null)}
+        />
+      )}
 
     </aside>
   );

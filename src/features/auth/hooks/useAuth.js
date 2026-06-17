@@ -84,7 +84,7 @@ export function useAuth() {
 
       // NAVIGATE
       navigate(
-        '/admin/products',
+        '/',
         {
           replace: true,
         },

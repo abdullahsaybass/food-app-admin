@@ -5,7 +5,7 @@ import { useAdminOrders, useOrderStats } from "../hooks/orderAuth.js";
 import { normalizeError } from "../../../shared/lib/error-handler.js";
 import OrderStatusBadge from "../components/OrderStatusBadge";
 import UpdateStatusModal from "../components/UpdateStatusModal";
-import { ORDER_STATUS } from "../types";
+import { ORDER_STATUS, ORDER_STATUS_LABELS } from "../types";
 import styles from "./OrdersPage.module.css";
 
 const STATUS_TABS   = ["all", ...Object.values(ORDER_STATUS)];
@@ -104,7 +104,7 @@ export default function OrdersPage() {
             className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
             onClick={() => handleTabChange(tab)}
           >
-            {tab === "all" ? "All" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab === "all" ? "All" : ORDER_STATUS_LABELS[tab] ?? tab}
           </button>
         ))}
       </div>

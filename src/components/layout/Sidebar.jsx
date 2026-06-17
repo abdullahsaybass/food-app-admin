@@ -1,4 +1,5 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth.store';
 import './Sidebar.css';
 
@@ -7,10 +8,28 @@ const NAV_ITEMS = [
     label: 'Main',
     links: [
       { to: '/',            label: 'Overview',   icon: <OverviewIcon />, end: true },
-      { to: '/products',    label: 'Products',   icon: <ProductsIcon /> },
+      {
+        key: 'products',
+        label: 'Products',
+        icon: <ProductsIcon />,
+        to: '/products',
+        children: [
+          { to: '/products',     label: 'All Products', end: true },
+          { to: '/products/add', label: 'Add Product',  icon: <AddProductIcon /> },
+        ],
+      },
       { to: '/orders',      label: 'Orders',     icon: <OrderIcon />   },
       { to: '/favourites',  label: 'Favourite',  icon: <FavIcon />     },
-      { to: '/categories',  label: 'Categories', icon: <CatIcon />     },
+      {
+        key: 'categories',
+        label: 'Categories',
+        icon: <CatIcon />,
+        to: '/categories',
+        children: [
+          { to: '/categories',     label: 'All Categories', end: true },
+          { to: '/categories/add', label: 'Add Category',  icon: <AddCategoryIcon /> },
+        ],
+      },
       { to: '/users',       label: 'Users',      icon: <UsersIcon />   },
       { to: '/messages',    label: 'Message',    icon: <MsgIcon />, badge: 5 },
       { to: '/invoice',     label: 'Invoice',    icon: <InvoiceIcon /> },
@@ -29,10 +48,50 @@ export default function Sidebar() {
   const logout = useAuthStore((s) => s.logout);
   const user   = useAuthStore((s) => s.user);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await logout();
     navigate('/login', { replace: true });
+  };
+
+  // Auto-expand a parent menu if the current route matches one of its children
+  const initialExpanded = {};
+  NAV_ITEMS.forEach((section) => {
+    section.links.forEach((item) => {
+      if (item.children) {
+        const isChildActive = item.children.some((child) =>
+          child.end
+            ? location.pathname === child.to
+            : location.pathname.startsWith(child.to)
+        );
+        if (isChildActive) initialExpanded[item.key] = true;
+      }
+    });
+  });
+
+  const [expanded, setExpanded] = useState(initialExpanded);
+
+  // Keep parent menus open when navigating to a child route
+  useEffect(() => {
+    const active = {};
+    NAV_ITEMS.forEach((section) => {
+      section.links.forEach((item) => {
+        if (item.children) {
+          const isChildActive = item.children.some((child) =>
+            child.end
+              ? location.pathname === child.to
+              : location.pathname.startsWith(child.to)
+          );
+          if (isChildActive) active[item.key] = true;
+        }
+      });
+    });
+    setExpanded((prev) => ({ ...prev, ...active }));
+  }, [location.pathname]);
+
+  const toggleExpanded = (key) => {
+    setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
@@ -47,22 +106,67 @@ export default function Sidebar() {
       {NAV_ITEMS.map((section) => (
         <div key={section.label} className="sidebar-section">
           <p className="sidebar-section-label">{section.label}</p>
-          {section.links.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                `sidebar-link ${isActive ? 'sidebar-link--active' : ''}`
-              }
-            >
-              <span className="sidebar-link-icon">{item.icon}</span>
-              <span className="sidebar-link-label">{item.label}</span>
-              {item.badge && (
-                <span className="sidebar-badge">{item.badge}</span>
-              )}
-            </NavLink>
-          ))}
+          {section.links.map((item) => {
+            if (item.children) {
+              const isOpen = !!expanded[item.key];
+              const isParentActive = item.children.some((child) =>
+                child.end
+                  ? location.pathname === child.to
+                  : location.pathname.startsWith(child.to)
+              );
+
+              return (
+                <div key={item.key} className="sidebar-group">
+                  <button
+                    type="button"
+                    className={`sidebar-link sidebar-link--parent ${isParentActive ? 'sidebar-link--active' : ''}`}
+                    onClick={() => toggleExpanded(item.key)}
+                  >
+                    <span className="sidebar-link-icon">{item.icon}</span>
+                    <span className="sidebar-link-label">{item.label}</span>
+                    <span className={`sidebar-chevron ${isOpen ? 'sidebar-chevron--open' : ''}`}>
+                      <ChevronIcon />
+                    </span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="sidebar-submenu">
+                      {item.children.map((child) => (
+                        <NavLink
+                          key={child.to}
+                          to={child.to}
+                          end={child.end}
+                          className={({ isActive }) =>
+                            `sidebar-link sidebar-sublink ${isActive ? 'sidebar-link--active' : ''}`
+                          }
+                        >
+                          {child.icon && <span className="sidebar-link-icon">{child.icon}</span>}
+                          <span className="sidebar-link-label">{child.label}</span>
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  `sidebar-link ${isActive ? 'sidebar-link--active' : ''}`
+                }
+              >
+                <span className="sidebar-link-icon">{item.icon}</span>
+                <span className="sidebar-link-label">{item.label}</span>
+                {item.badge && (
+                  <span className="sidebar-badge">{item.badge}</span>
+                )}
+              </NavLink>
+            );
+          })}
         </div>
       ))}
 
@@ -114,6 +218,15 @@ function OverviewIcon() {
     </svg>
   );
 }
+function AddProductIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+      <line x1="12" y1="9" x2="12" y2="15"/>
+      <line x1="9" y1="12" x2="15" y2="12"/>
+    </svg>
+  );
+}
 function ProductsIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -139,6 +252,15 @@ function CatIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+    </svg>
+  );
+}
+function AddCategoryIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+      <line x1="12" y1="10" x2="12" y2="16"/>
+      <line x1="9" y1="13" x2="15" y2="13"/>
     </svg>
   );
 }
@@ -194,6 +316,13 @@ function LogoutIcon() {
       <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
       <polyline points="16 17 21 12 16 7"/>
       <line x1="21" y1="12" x2="9" y2="12"/>
+    </svg>
+  );
+}
+function ChevronIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="6 9 12 15 18 9"/>
     </svg>
   );
 }

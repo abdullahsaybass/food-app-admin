@@ -1,48 +1,138 @@
 // src/features/products/pages/ProductListPage.jsx
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProducts, useDeleteProduct, useDeactivateProduct } from '../hooks/useProduct.js';
-import { ProductFormModal } from '../components/ProductFormModal';
+import { useProductStats } from '../hooks/useProductStats.js';
+import { fetchCategories } from '../../catergory/api/category.api.js';
 import { ProductDetailPanel } from '../components/ProductDetailPanel';
 import { DeleteConfirmModal } from '../components/DeleteConfirmModal';
 import './ProductListPage.css';
 
 const ALL_CATEGORY = 'All';
 
+// Stock Status maps to real backend filters:
+//  - "low_stock"  → lowStock=true   (backend-applied, product.service.js)
+//  - "out_of_stock" / "in_stock" → not supported server-side (inStock param
+//    exists in the Joi schema but is never read in product.service.js), so
+//    these two are filtered client-side on the currently loaded page only.
+const STOCK_STATUS_OPTIONS = [
+  { value: '',             label: 'All' },
+  { value: 'in_stock',     label: 'In Stock' },
+  { value: 'low_stock',    label: 'Low Stock' },
+  { value: 'out_of_stock', label: 'Out of Stock' },
+];
+
+const STATUS_OPTIONS = [
+  { value: '',      label: 'All Status' },
+  { value: 'true',  label: 'Active' },
+  { value: 'false', label: 'Inactive' },
+];
+
+const FEATURED_OPTIONS = [
+  { value: '',      label: 'All' },
+  { value: 'true',  label: 'Featured' },
+  { value: 'false', label: 'Not Featured' },
+];
+
+function exportProductsToCSV(products) {
+  const header = ['Name', 'SKU', 'Category', 'Price', 'Stock', 'Status', 'Featured', 'Created At'];
+  const rows = products.map((p) => {
+    const v = p.variants?.[0] ?? {};
+    const totalStock = p.totalStock ?? (p.variants ?? []).reduce((sum, variant) => sum + (variant.quantity ?? 0), 0);
+    return [
+      p.name,
+      v.sku ?? 'N/A',
+      p.category?.name ?? 'Uncategorized',
+      v.price ?? 0,
+      totalStock,
+      p.isActive ? 'Active' : 'Inactive',
+      p.featured ? 'Yes' : 'No',
+      p.createdAt ? new Date(p.createdAt).toISOString() : '',
+    ];
+  });
+  const csv = [header, ...rows]
+    .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `products-export-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 export default function ProductListPage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState(ALL_CATEGORY);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [stockStatusFilter, setStockStatusFilter] = useState('');
+  const [featuredFilter, setFeaturedFilter] = useState('');
   const [page, setPage] = useState(1);
+  const navigate = useNavigate();
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [editProduct, setEditProduct] = useState(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
+
+  // All categories (for the filter dropdown + tabs) — fetched independently
+  // of the product list so it isn't limited to categories on the current page.
+  const [allCategories, setAllCategories] = useState([]);
+  useEffect(() => {
+    fetchCategories(false)
+      .then((res) => setAllCategories(res.data?.data ?? []))
+      .catch(() => setAllCategories([]));
+  }, []);
 
   const params = useMemo(() => ({
     page,
     limit: 10,
     search: search || undefined,
     category: category !== ALL_CATEGORY ? category : undefined,
-  }), [page, search, category]);
+    isActive: statusFilter !== '' ? statusFilter === 'true' : undefined,
+    featured: featuredFilter !== '' ? featuredFilter === 'true' : undefined,
+    // Only "low_stock" is a real backend filter (see product.service.js).
+    lowStock: stockStatusFilter === 'low_stock' ? true : undefined,
+  }), [page, search, category, statusFilter, featuredFilter, stockStatusFilter]);
 
     const { data, isLoading, isError } = useProducts(params);
+    const { data: stats } = useProductStats();
 
     const deleteProduct = useDeleteProduct();
     const deactivateProduct = useDeactivateProduct();
 
     // ✅ FIX
-    const products = data?.products ?? [];
+    const rawProducts = data?.products ?? [];
     const pagination = data?.pagination;
 
-  const categories = useMemo(() => {
-    const cats = new Set(products.map((p) => p.category));
-    return [ALL_CATEGORY, ...Array.from(cats)];
-  }, [products]);
+    const getTotalStock = (product) =>
+      product.totalStock ?? (product.variants ?? []).reduce((sum, variant) => sum + (variant.quantity ?? 0), 0);
+    const getStockStatus = (product) => {
+      const variants = product.variants ?? [];
+      if (variants.length === 0) return 'in_stock';
+      if (variants.every((v) => v.quantity === 0)) return 'out_of_stock';
+      if (variants.some((v) => v.quantity > 0 && v.quantity <= (v.stockThreshold ?? 10))) return 'low_stock';
+      return 'in_stock';
+    };
+
+    // "in_stock" / "out_of_stock" aren't backend-filterable (see note above),
+    // so we apply them client-side on the current page only. "low_stock" is
+    // already filtered server-side via the lowStock param, so it's a no-op here.
+    const products = useMemo(() => {
+      if (stockStatusFilter === 'in_stock' || stockStatusFilter === 'out_of_stock') {
+        return rawProducts.filter((p) => getStockStatus(p) === stockStatusFilter);
+      }
+      return rawProducts;
+    }, [rawProducts, stockStatusFilter]);
+
+  const categories = useMemo(() => ([
+    { id: ALL_CATEGORY, name: ALL_CATEGORY },
+    ...allCategories.map((c) => ({ id: c.id ?? c._id, name: c.name })),
+  ]), [allCategories]);
 
   const getPrimaryVariant = (product) => product.variants?.[0] ?? {};
-  const getTotalStock = (product) =>
-    product.totalStock ?? (product.variants ?? []).reduce((sum, variant) => sum + (variant.quantity ?? 0), 0);
 
   const handleCategoryChange = (cat) => {
     setCategory(cat);
@@ -51,6 +141,15 @@ export default function ProductListPage() {
 
   const handleSearch = (val) => {
     setSearch(val);
+    setPage(1);
+  };
+
+  const handleResetFilters = () => {
+    setSearch('');
+    setCategory(ALL_CATEGORY);
+    setStatusFilter('');
+    setStockStatusFilter('');
+    setFeaturedFilter('');
     setPage(1);
   };
 
@@ -72,40 +171,121 @@ export default function ProductListPage() {
       {/* ── Top bar ── */}
       <div className="plp-topbar">
         <div className="plp-topbar-left">
-          <h1 className="plp-title">Product Lists</h1>
-          {pagination && (
-            <span className="plp-count">{pagination.total} items</span>
-          )}
+          <h1 className="plp-title">All Products</h1>
+          <p className="plp-subtitle">Manage all your products, inventory, pricing and status.</p>
         </div>
         <div className="plp-topbar-right">
-          <div className="plp-search">
-            <SearchIcon />
-            <input
-              placeholder="Type product name..."
-              value={search}
-              onChange={(e) => handleSearch(e.target.value)}
-            />
-          </div>
-          <button className="plp-filter-btn">
-            <FilterIcon /> Filter
+          <button className="plp-export-btn" onClick={() => exportProductsToCSV(products)}>
+            <ExportIcon /> Export
           </button>
-          <button className="plp-add-btn" onClick={() => setShowCreateModal(true)}>
-            <PlusIcon /> Add Products
+          <button className="plp-add-btn" onClick={() => navigate('/products/add')}>
+            <PlusIcon /> Add Product
           </button>
         </div>
       </div>
 
-      {/* ── Category tabs ── */}
-      <div className="plp-cats">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            className={`plp-cat-btn ${category === cat ? 'plp-cat-btn--active' : ''}`}
-            onClick={() => handleCategoryChange(cat)}
+      {/* ── Stats cards ── */}
+      <div className="plp-stats">
+        <div className="plp-stat-card">
+          <div className="plp-stat-icon plp-stat-icon--blue"><BoxIcon /></div>
+          <div>
+            <p className="plp-stat-label">Total Products</p>
+            <p className="plp-stat-value">{stats?.total ?? '—'}</p>
+            <p className="plp-stat-sub">All products</p>
+          </div>
+        </div>
+        <div className="plp-stat-card">
+          <div className="plp-stat-icon plp-stat-icon--indigo"><BriefcaseIcon /></div>
+          <div>
+            <p className="plp-stat-label">Active Products</p>
+            <p className="plp-stat-value">{stats?.active ?? '—'}</p>
+            <p className="plp-stat-sub">Currently active</p>
+          </div>
+        </div>
+        <div className="plp-stat-card">
+          <div className="plp-stat-icon plp-stat-icon--purple"><TagIcon /></div>
+          <div>
+            <p className="plp-stat-label">Out of Stock</p>
+            <p className="plp-stat-value">{stats?.outOfStock ?? '—'}</p>
+            <p className="plp-stat-sub">Not available</p>
+          </div>
+        </div>
+        <div className="plp-stat-card">
+          <div className="plp-stat-icon plp-stat-icon--amber"><AlertIcon /></div>
+          <div>
+            <p className="plp-stat-label">Low Stock</p>
+            <p className="plp-stat-value">{stats?.lowStock ?? '—'}</p>
+            <p className="plp-stat-sub">Stock running low</p>
+          </div>
+        </div>
+        <div className="plp-stat-card">
+          <div className="plp-stat-icon plp-stat-icon--teal"><LayersIcon /></div>
+          <div>
+            <p className="plp-stat-label">Total Categories</p>
+            <p className="plp-stat-value">{stats?.totalCategories ?? '—'}</p>
+            <p className="plp-stat-sub">All categories</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Filters row ── */}
+      <div className="plp-filters-row">
+        <div className="plp-search">
+          <SearchIcon />
+          <input
+            placeholder="Search by product name, SKU, barcode..."
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
+          />
+        </div>
+
+        <div className="plp-filter-group">
+          <label className="plp-filter-label">Category</label>
+          <select
+            className="plp-filter-select"
+            value={category}
+            onChange={(e) => handleCategoryChange(e.target.value)}
           >
-            {cat}
-          </button>
-        ))}
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>{cat.id === ALL_CATEGORY ? 'All Categories' : cat.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="plp-filter-group">
+          <label className="plp-filter-label">Status</label>
+          <select
+            className="plp-filter-select"
+            value={statusFilter}
+            onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          >
+            {STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+
+        <div className="plp-filter-group">
+          <label className="plp-filter-label">Stock Status</label>
+          <select
+            className="plp-filter-select"
+            value={stockStatusFilter}
+            onChange={(e) => { setStockStatusFilter(e.target.value); setPage(1); }}
+          >
+            {STOCK_STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+
+        <div className="plp-filter-group">
+          <label className="plp-filter-label">Featured</label>
+          <select
+            className="plp-filter-select"
+            value={featuredFilter}
+            onChange={(e) => { setFeaturedFilter(e.target.value); setPage(1); }}
+          >
+            {FEATURED_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        </div>
+
+        <button className="plp-reset-btn" onClick={handleResetFilters}>Reset</button>
       </div>
 
       {/* ── Body ── */}
@@ -120,12 +300,15 @@ export default function ProductListPage() {
             <thead>
               <tr>
                 <th><input type="checkbox" className="plp-checkbox" /></th>
-                <th>Product Name <SortIcon /></th>
-                <th>Price <SortIcon /></th>
-                <th>SKU</th>
-                <th>Quantity <SortIcon /></th>
+                <th>Product <SortIcon /></th>
+                <th>SKU / Barcode</th>
                 <th>Category <SortIcon /></th>
+                <th>Price <SortIcon /></th>
+                <th>Stock <SortIcon /></th>
                 <th>Status <SortIcon /></th>
+                <th>Stock Status</th>
+                <th>Featured</th>
+                <th>Created At</th>
                 <th></th>
               </tr>
             </thead>
@@ -143,12 +326,18 @@ export default function ProductListPage() {
                       <td><div className="skel skel-md" /></td>
                       <td><div className="skel skel-md" /></td>
                       <td><div className="skel skel-sm" /></td>
+                      <td><div className="skel skel-sm" /></td>
+                      <td><div className="skel skel-md" /></td>
                       <td><div className="skel skel-md" /></td>
                       <td><div className="skel skel-sm" /></td>
+                      <td><div className="skel skel-md" /></td>
                       <td />
                     </tr>
                   ))
-                : products.map((product) => (
+                : products.map((product) => {
+                    const stockStatus = getStockStatus(product);
+                    const stockStatusLabel = { in_stock: 'In Stock', low_stock: 'Low Stock', out_of_stock: 'Out of Stock' }[stockStatus];
+                    return (
                     <tr
                       key={product.id}
                       className={`plp-row ${selectedProduct?.id === product.id ? 'plp-row--selected' : ''}`}
@@ -172,26 +361,42 @@ export default function ProductListPage() {
                           </div>
                           <div>
                             <p className="plp-product-name">{product.name}</p>
-                            <p className="plp-product-sku">SKU: #{getPrimaryVariant(product).sku ?? 'N/A'}</p>
+                            <p className="plp-product-sku">{getPrimaryVariant(product).unit ?? ''}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="plp-price">${(getPrimaryVariant(product).price ?? 0).toFixed(2)}</td>
-                      <td className="plp-sku">{getPrimaryVariant(product).sku ?? 'N/A'}</td>
                       <td>
-                        <span className={`plp-qty ${product.isLowStock ? 'plp-qty--low' : ''}`}>
-                          {getTotalStock(product)} {getPrimaryVariant(product).unit ?? 'pcs'}
-                          {product.isLowStock && <span className="plp-low-badge">Low</span>}
-                        </span>
+                        <p className="plp-sku">SKU: {getPrimaryVariant(product).sku ?? 'N/A'}</p>
                       </td>
                       <td>
-                        <span className="plp-category">{product.category}</span>
+                        <span className="plp-category">{product.category?.name ?? 'Uncategorized'}</span>
+                      </td>
+                      <td className="plp-price">${(getPrimaryVariant(product).price ?? 0).toFixed(2)}</td>
+                      <td>
+                        <span className={`plp-qty ${stockStatus !== 'in_stock' ? 'plp-qty--low' : ''}`}>
+                          {getTotalStock(product)} {getPrimaryVariant(product).unit ?? 'pcs'}
+                        </span>
                       </td>
                       <td>
                         <span className={`plp-status ${product.isActive ? 'plp-status--active' : 'plp-status--inactive'}`}>
                           <span className="plp-status-dot" />
                           {product.isActive ? 'Active' : 'Inactive'}
                         </span>
+                      </td>
+                      <td>
+                        <span className={`plp-stockstatus plp-stockstatus--${stockStatus}`}>
+                          {stockStatusLabel}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`plp-featured ${product.featured ? 'plp-featured--yes' : 'plp-featured--no'}`}>
+                          {product.featured ? 'Yes' : 'No'}
+                        </span>
+                      </td>
+                      <td className="plp-created">
+                        {product.createdAt
+                          ? new Date(product.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })
+                          : '—'}
                       </td>
                       <td onClick={(e) => e.stopPropagation()}>
                         <div className="plp-menu-wrap">
@@ -206,7 +411,7 @@ export default function ProductListPage() {
                           </button>
                           {openMenuId === product.id && (
                             <div className="plp-menu-dropdown" onClick={(e) => e.stopPropagation()}>
-                              <button onClick={() => { setEditProduct(product); setOpenMenuId(null); }}>
+                              <button onClick={() => { navigate(`/products/${product.id}/edit`); setOpenMenuId(null); }}>
                                 <EditIcon /> Edit
                               </button>
                               <button onClick={() => { setSelectedProduct(product); setOpenMenuId(null); }}>
@@ -226,7 +431,8 @@ export default function ProductListPage() {
                         </div>
                       </td>
                     </tr>
-                  ))
+                    );
+                  })
               }
             </tbody>
           </table>
@@ -259,27 +465,13 @@ export default function ProductListPage() {
           <ProductDetailPanel
             product={selectedProduct}
             onClose={() => setSelectedProduct(null)}
-            onEdit={() => { setEditProduct(selectedProduct); setSelectedProduct(null); }}
+            onEdit={() => navigate(`/products/${selectedProduct.id}/edit`)}
             onDeactivate={() => handleDeactivate(selectedProduct)}
             onDelete={() => { setDeleteTarget(selectedProduct); setSelectedProduct(null); }}
           />
         )}
       </div>
 
-      {/* ── Modals ── */}
-      {showCreateModal && (
-        <ProductFormModal
-          mode="create"
-          onClose={() => setShowCreateModal(false)}
-        />
-      )}
-      {editProduct && (
-        <ProductFormModal
-          mode="edit"
-          product={editProduct}
-          onClose={() => setEditProduct(null)}
-        />
-      )}
       {deleteTarget && (
         <DeleteConfirmModal
           productName={deleteTarget.name}
@@ -301,6 +493,24 @@ function PlusIcon() {
 }
 function FilterIcon() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>;
+}
+function ExportIcon() {
+  return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
+}
+function BoxIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>;
+}
+function BriefcaseIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>;
+}
+function TagIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>;
+}
+function AlertIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>;
+}
+function LayersIcon() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>;
 }
 function SortIcon() {
   return <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 15l5 5 5-5M7 9l5-5 5 5"/></svg>;

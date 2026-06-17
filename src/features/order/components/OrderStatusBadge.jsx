@@ -1,5 +1,5 @@
 // features/orders/components/OrderStatusBadge.jsx
-import { STATUS_COLORS } from "../types";
+import { STATUS_COLORS, ORDER_STATUS_LABELS } from "../types";
 import styles from "./OrderStatusBadge.module.css";
 
 export default function OrderStatusBadge({ status }) {
@@ -7,8 +7,7 @@ export default function OrderStatusBadge({ status }) {
   return (
     <span className={styles.badge} style={{ backgroundColor: color.bg, color: color.text }}>
       <span className={styles.dot} style={{ backgroundColor: color.dot }} />
-      {status}
+      {ORDER_STATUS_LABELS[status] ?? status}
     </span>
   );
 }
- 

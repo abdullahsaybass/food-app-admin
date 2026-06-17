@@ -2,8 +2,6 @@
 
 import apiClient from '../../../core/api/httpClient.js';
 
-// src/features/products/api.js
-
 export const productApi = {
   list: async (params) => {
     const { data } = await apiClient.get('/products', { params });
@@ -25,15 +23,15 @@ export const productApi = {
     return data;
   },
 
-update: async (id, payload) => {
-  try {
-    const { data } = await apiClient.put(`/products/${id}`, payload);
-    return data;
-  } catch (error) {
-    console.log('UPDATE ERROR:', error.response?.data);
-    throw error;
-  }
-},
+  update: async (id, payload) => {
+    try {
+      const { data } = await apiClient.put(`/products/${id}`, payload);
+      return data;
+    } catch (error) {
+      console.log('UPDATE ERROR:', error.response?.data);
+      throw error;
+    }
+  },
 
   deactivate: async (id) => {
     const { data } = await apiClient.patch(`/products/${id}/deactivate`);
@@ -44,19 +42,16 @@ update: async (id, payload) => {
     await apiClient.delete(`/products/${id}`);
   },
 
-  // 🔥 Upload images from computer → Cloudinary
-  // files: FileList or File[]
-  // returns: [{ url, publicId, altText }]
+  // Don't manually set Content-Type for FormData — Axios auto-sets multipart/form-data
+  // with the correct boundary. Passing a headers object here merges incorrectly and
+  // can drop the Authorization header set by the interceptor.
   uploadImages: async (files) => {
     const formData = new FormData();
     Array.from(files).forEach((file) => formData.append('images', file));
-    const { data } = await apiClient.post('/products/upload-images', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    const { data } = await apiClient.post('/products/upload-images', formData);
     return data.data; // [{ url, publicId, altText }]
   },
 
-  // 🔥 Delete a single image from Cloudinary
   deleteImage: async (publicId) => {
     await apiClient.delete(`/products/upload-images/${encodeURIComponent(publicId)}`);
   },

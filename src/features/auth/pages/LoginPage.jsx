@@ -8,7 +8,7 @@ export default function LoginPage() {
   const token = useAuthStore((s) => s.token);
 
   if (token) {
-    return <Navigate to="/admin/products" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <LoginForm />;

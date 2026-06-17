@@ -1,6 +1,6 @@
 // features/orders/components/UpdateStatusModal.jsx
 import { useState } from "react";
-import { STATUS_TRANSITIONS } from "../types";
+import { STATUS_TRANSITIONS, ORDER_STATUS_LABELS } from "../types";
 import { useUpdateOrderStatus } from "../hooks/orderAuth.js";
 import { normalizeError } from "../../../shared/lib/error-handler.js";
 import styles from "./UpdateStatusModal.module.css";
@@ -29,7 +29,7 @@ export default function UpdateStatusModal({ order, onClose }) {
         <p className={styles.meta}>
           Order <span className={styles.orderId}>#{order.id?.slice(-8).toUpperCase()}</span>
           &nbsp;·&nbsp;Current:&nbsp;
-          <strong style={{ textTransform: "capitalize" }}>{order.status}</strong>
+          <strong>{ORDER_STATUS_LABELS[order.status] ?? order.status}</strong>
         </p>
 
         {localError && (
@@ -56,7 +56,7 @@ export default function UpdateStatusModal({ order, onClose }) {
                   onClick={() => setStatus(s)}
                 >
                   <span className={`${styles.optionDot} ${status === s ? styles.activeDot : ""}`} />
-                  {s}
+                  {ORDER_STATUS_LABELS[s] ?? s}
                 </label>
               ))}
             </div>

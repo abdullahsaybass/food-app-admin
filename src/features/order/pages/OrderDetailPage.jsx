@@ -70,7 +70,7 @@ export default function OrderDetailPage() {
           <table className={styles.table}>
             <thead>
               <tr>
-                {["Product", "Unit Price", "Qty", "Subtotal"].map((h) => (
+                {["Product", "Variant", "Unit Price", "Qty", "Subtotal"].map((h) => (
                   <th key={h} className={styles.th}>{h}</th>
                 ))}
               </tr>
@@ -79,6 +79,10 @@ export default function OrderDetailPage() {
               {order.items?.map((item, i) => (
                 <tr key={i}>
                   <td className={styles.td}><span className={styles.productName}>{item.name}</span></td>
+                  <td className={styles.td}>
+                    {item.unit}
+                    {item.sku && <span style={{ display: 'block', fontSize: '0.75rem', color: '#9CA3AF' }}>SKU: {item.sku}</span>}
+                  </td>
                   <td className={styles.td}>₹{item.price?.toFixed(2)}</td>
                   <td className={styles.td}>{item.quantity}</td>
                   <td className={styles.td}><strong>₹{item.subtotal?.toFixed(2)}</strong></td>
