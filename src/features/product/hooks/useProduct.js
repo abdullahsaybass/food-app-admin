@@ -67,7 +67,7 @@ export function useDeleteProduct() {
   });
 }
 
-// 🔥 Upload files → Cloudinary via backend
+// 🔥 Upload files → saved to local disk via backend
 // mutateAsync(files: File[]) → [{ url, publicId, altText }]
 export function useUploadImages() {
   return useMutation({
@@ -75,7 +75,7 @@ export function useUploadImages() {
   });
 }
 
-// 🔥 Delete a single image from Cloudinary
+// 🔥 Delete a single image from server storage
 // mutateAsync(publicId: string)
 export function useDeleteImage() {
   return useMutation({

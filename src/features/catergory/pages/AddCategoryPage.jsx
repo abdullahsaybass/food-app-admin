@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import useCategory from "../hooks/useCategory";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
+import { resolveImageUrl } from "../../../core/config/env";
 import styles from "./AddCategoryPage.module.css";
 
 /* ── Helpers ── */
@@ -76,9 +77,9 @@ const AddCategoryPage = () => {
         setSortOrder(cat.sortOrder ?? 1);
         setIsActive(cat.isActive ?? true);
         setExistingImage(cat.image ?? null);
-        setImagePreview(cat.image?.url ?? null);
+        setImagePreview(resolveImageUrl(cat.image?.url) ?? null);
         setExistingBanner(cat.banner ?? null);
-        setBannerPreview(cat.banner?.url ?? null);
+        setBannerPreview(resolveImageUrl(cat.banner?.url) ?? null);
         setKeyManuallySet(true);
         setProductCount(cat.productCount ?? cat.productsCount ?? cat.totalProducts ?? 0);
         setMeta({

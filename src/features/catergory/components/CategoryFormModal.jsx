@@ -1,5 +1,6 @@
 // features/category/components/CategoryFormModal.jsx
 import { useState, useEffect, useRef } from "react";
+import { resolveImageUrl } from "../../../core/config/env";
 import styles from "./CategoryFormModal.module.css";
 
 /* ── Helpers ── */
@@ -37,7 +38,7 @@ const CategoryFormModal = ({ isOpen, onClose, onSubmit, uploading, submitting, i
       setSortOrder(initialData.sortOrder ?? 1);
       setIsActive(initialData.isActive ?? true);
       setExistingImage(initialData.image ?? null);
-      setImagePreview(initialData.image?.url ?? null);
+      setImagePreview(resolveImageUrl(initialData.image?.url) ?? null);
       setImageFile(null);
       setKeyManuallySet(true);
     } else {

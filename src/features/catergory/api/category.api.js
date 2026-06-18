@@ -31,7 +31,7 @@ export const updateCategory = (id, data) => httpClient.patch(`${BASE}/${id}`, da
 export const deleteCategory = (id) => httpClient.delete(`${BASE}/${id}`);
 
 /**
- * Upload an image to Cloudinary via the backend upload endpoint.
+ * Upload an image via the backend upload endpoint (saved to local disk on the server).
  * Returns { url, publicId }.
  *
  * NOTE: Adjust the endpoint to whatever your backend exposes for file uploads.

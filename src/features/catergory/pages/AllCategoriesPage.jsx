@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import useCategory from "../hooks/useCategory";
 import CategoryFormModal from "../components/CategoryFormModal";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
+import { resolveImageUrl } from "../../../core/config/env";
 import styles from "./AllCategoriesPage.module.css";
 
 const PAGE_SIZE = 8;
@@ -285,8 +286,8 @@ const AllCategoriesPage = () => {
                           <div className={styles.catImgs}>
                             {cat.image?.url ? (
                               <>
-                                <img src={cat.image.url} alt={cat.name} className={styles.catImgSm} />
-                                <img src={cat.image.url} alt={cat.name} className={styles.catImgLg} />
+                                <img src={resolveImageUrl(cat.image.url)} alt={cat.name} className={styles.catImgSm} />
+                                <img src={resolveImageUrl(cat.image.url)} alt={cat.name} className={styles.catImgLg} />
                               </>
                             ) : (
                               <div className={styles.noImgBox}>📷</div>
