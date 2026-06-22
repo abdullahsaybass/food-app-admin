@@ -1,0 +1,263 @@
+/* src/features/privacy/pages/PrivacyPolicyPage.module.css */
+
+.root {
+  min-height: 100vh;
+  background: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #1a1a1a;
+}
+
+/* ────────────────────────────────
+   HERO
+──────────────────────────────── */
+.hero {
+  background: #f0fdf4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 56px 10%;
+}
+
+.heroLeft {
+  flex: 1;
+  max-width: 520px;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0F6E56;
+  margin-bottom: 16px;
+}
+
+.heroTitle {
+  font-size: 46px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 18px;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.heroDesc {
+  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.75;
+  margin: 0 0 20px;
+}
+
+.heroDate {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  color: #6b7280;
+}
+
+.heroDate span {
+  color: #0F6E56;
+  font-weight: 600;
+}
+
+.heroRight {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shieldWrap {
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shieldSvg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 8px 24px rgba(15,110,86,0.15));
+}
+
+/* ────────────────────────────────
+   CARDS GRID
+──────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 48px 10%;
+  background: #fff;
+}
+
+.card {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 24px 22px;
+  transition: box-shadow 0.15s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 20px rgba(15,110,86,0.08);
+}
+
+.cardIcon {
+  width: 44px;
+  height: 44px;
+  background: #f0fdf4;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0F6E56;
+  margin-bottom: 14px;
+}
+
+.cardIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.cardNum {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.cardDivider {
+  width: 32px;
+  height: 2.5px;
+  background: #0F6E56;
+  border-radius: 2px;
+  margin-bottom: 12px;
+}
+
+.cardText {
+  font-size: 13.5px;
+  color: #4b5563;
+  line-height: 1.7;
+  margin: 0 0 12px;
+}
+
+/* ── Check list ── */
+.checkList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+}
+
+.checkItem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  color: #374151;
+}
+
+/* ── Contact card — full width ── */
+.contactCard {
+  grid-column: 1 / -1;
+}
+
+.contactRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #374151;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 16px;
+  flex: 1;
+  min-width: 160px;
+}
+
+/* ────────────────────────────────
+   TRUST BANNER
+──────────────────────────────── */
+.trustBanner {
+  background: #f0fdf4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 32px 10%;
+  border-radius: 0;
+  margin: 0 10% 48px;
+  border-radius: 16px;
+}
+
+.trustLeft {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+}
+
+.trustShieldIcon {
+  width: 60px;
+  height: 60px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(15,110,86,0.12);
+  flex-shrink: 0;
+}
+
+.trustTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0F6E56;
+  margin: 0 0 6px;
+}
+
+.trustDesc {
+  font-size: 13.5px;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.trustRight {
+  flex-shrink: 0;
+}
+
+/* ────────────────────────────────
+   RESPONSIVE
+──────────────────────────────── */
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    padding: 36px 5%;
+    text-align: center;
+  }
+  .heroLeft { max-width: 100%; }
+  .heroBadge { justify-content: center; }
+  .heroDate { justify-content: center; }
+  .heroTitle { font-size: 32px; }
+  .grid { grid-template-columns: 1fr; padding: 32px 5%; }
+  .contactCard { grid-column: auto; }
+  .checkList { grid-template-columns: 1fr; }
+  .trustBanner { flex-direction: column; margin: 0 5% 36px; padding: 24px 5%; }
+  .trustRight { display: none; }
+}

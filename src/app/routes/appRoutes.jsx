@@ -18,6 +18,7 @@ import AddCouponPage     from '../../features/coupon/pages/AddCouponPage';
 import AllBannersPage    from '../../features/banner/pages/AllBannersPage';
 import InvoicesPage      from '../../features/invoice/pages/InvoicesPage';
 import InvoiceDetailPage from '../../features/invoice/pages/InvoiceDetailPage';
+import PrivacyPolicyPage from '../../features/privacy/pages/PrivacyPolicyPage';
 
 const router = createBrowserRouter([
   {
@@ -46,7 +47,9 @@ const router = createBrowserRouter([
       { path: 'invoice/:id', element: <InvoiceDetailPage /> },
     ],
   },
+  // Public routes — no AuthGuard, no AdminLayout (no sidebar)
   { path: '/login', element: <LoginPage /> },
+  { path: '/privacy-policy', element: <PrivacyPolicyPage /> },
   { path: '/unauthorized', element: <div style={{ padding: 40 }}>Not authorized</div> },
   { path: '*', element: <div style={{ padding: 40 }}>404 — Page not found</div> },
 ]);
