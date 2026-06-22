@@ -1,0 +1,156 @@
+/* features/invoice/pages/InvoiceDetailPage.module.css */
+.page     { padding: 10px; display: flex; flex-direction: column; gap: 20px; }
+.centered { padding: 80px; text-align: center; color: #9ca3af; font-size: 14px; }
+
+/* ── Breadcrumb ── */
+.breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #9ca3af; }
+.crumbLink    { color: #6b7280; text-decoration: none; }
+.crumbLink:hover { color: #111; text-decoration: underline; }
+.crumbSep     { color: #d1d5db; }
+.crumbCurrent { color: #111; font-weight: 600; }
+
+/* ── Header ── */
+.headerRow  { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+.headingRow { display: flex; align-items: center; gap: 10px; }
+.heading    { font-size: 22px; font-weight: 700; color: #111; margin: 0; }
+.sub        { font-size: 13px; color: #6b7280; margin-top: 4px; }
+
+.headerActions { display: flex; gap: 10px; flex-wrap: wrap; }
+.ghostBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: 8px; border: 1.5px solid #e5e7eb;
+  background-color: #fff; color: #374151; font-size: 13px; font-weight: 500; cursor: pointer;
+}
+.ghostBtn:hover { background-color: #f9fafb; }
+.primaryBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: 8px; border: none;
+  background-color: #0f172a; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.primaryBtn:hover { background-color: #1e293b; }
+
+/* ── Cards ── */
+.card {
+  background-color: #fff; border: 1.5px solid #e5e7eb; border-radius: 12px;
+  padding: 22px 24px;
+}
+.cardTitle { font-size: 15px; font-weight: 700; color: #111; margin: 0 0 16px; }
+
+/* ── Top grid: Details + Preview ── */
+.topGrid    { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; align-items: start; }
+.bottomGrid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: start; }
+
+@media (max-width: 1000px) {
+  .topGrid, .bottomGrid { grid-template-columns: 1fr; }
+}
+
+/* ── Detail rows ── */
+.detailsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+.detailCol   { display: flex; flex-direction: column; }
+.detailRow {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 0; border-bottom: 1px solid #f3f4f6;
+}
+.detailIcon {
+  width: 32px; height: 32px; flex-shrink: 0; border-radius: 8px;
+  background-color: #f3f4f6; color: #6b7280;
+  display: flex; align-items: center; justify-content: center;
+}
+.detailLabel { font-size: 11px; color: #9ca3af; margin: 0 0 3px; }
+.detailValue { font-size: 13.5px; font-weight: 600; color: #111; margin: 0; }
+
+.badge {
+  display: inline-block; font-size: 11px; font-weight: 700; text-transform: capitalize;
+  padding: 3px 10px; border-radius: 999px; background-color: #f3f4f6; color: #6b7280;
+}
+.badge[data-tone="green"]  { background-color: #dcfce7; color: #14532d; }
+.badge[data-tone="yellow"] { background-color: #fef9c3; color: #854d0e; }
+.badge[data-tone="red"]    { background-color: #fee2e2; color: #991b1b; }
+.badge[data-tone="blue"]   { background-color: #dbeafe; color: #1e40af; }
+
+/* ── Invoice Preview card ── */
+.previewHint { font-size: 12px; color: #9ca3af; margin: -10px 0 14px; }
+.previewSheet {
+  border: 1.5px dashed #e5e7eb; border-radius: 10px; padding: 18px;
+  background-color: #fafafa;
+}
+.previewTop { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.previewLogoImg { height: 32px; width: auto; object-fit: contain; }
+.previewPaidBadge {
+  font-size: 11px; font-weight: 700; text-transform: capitalize;
+  padding: 3px 12px; border-radius: 999px; background-color: #dcfce7; color: #14532d;
+}
+.previewPaidBadge[data-tone="yellow"] { background-color: #fef9c3; color: #854d0e; }
+.previewPaidBadge[data-tone="red"]    { background-color: #fee2e2; color: #991b1b; }
+
+.previewBizRow {
+  display: flex; justify-content: space-between; gap: 16px;
+  padding-bottom: 14px; border-bottom: 1px dashed #e5e7eb; margin-bottom: 14px;
+}
+.previewBizName { font-size: 13px; font-weight: 700; color: #111; margin: 0 0 3px; }
+.previewBizLine { font-size: 11.5px; color: #6b7280; margin: 1px 0; }
+.previewMeta { text-align: right; font-size: 11.5px; color: #374151; }
+.previewMeta p { margin: 2px 0; }
+.previewMeta span { color: #9ca3af; margin-right: 4px; }
+
+.previewBillRow {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+  padding-bottom: 14px; border-bottom: 1px dashed #e5e7eb; margin-bottom: 14px;
+}
+.previewLabelSm { font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #9ca3af; margin: 0 0 6px; }
+
+.previewItemsTable { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+.previewItemsTh, .previewItemsThRight {
+  padding: 6px 4px; text-align: left; font-size: 10px; font-weight: 700;
+  color: #9ca3af; text-transform: uppercase; letter-spacing: 0.03em;
+  border-bottom: 1px dashed #e5e7eb;
+}
+.previewItemsThRight { text-align: right; }
+.previewItemsTd, .previewItemsTdRight { padding: 6px 4px; font-size: 12px; color: #111; border-bottom: 1px solid #f3f4f6; }
+.previewItemsTdRight { text-align: right; }
+
+.previewBreakdown { padding-top: 4px; }
+.previewBreakdownRow { display: flex; justify-content: space-between; font-size: 12px; color: #4b5563; padding: 5px 0; }
+.previewGrandTotal { border-top: 1.5px solid #111; margin-top: 4px; padding-top: 8px; font-size: 13.5px; font-weight: 800; color: #111; }
+
+.previewFooter { display: flex; gap: 14px; align-items: center; }
+.qr { border: 1px solid #e5e7eb; border-radius: 4px; flex-shrink: 0; }
+.previewThanks { font-size: 12.5px; font-weight: 700; color: #111; margin: 0; }
+
+/* ── Tables (Order Items / Invoice History) ── */
+.table { width: 100%; border-collapse: collapse; }
+.th, .thRight {
+  padding: 10px 8px; text-align: left; font-size: 11px; font-weight: 700;
+  color: #9ca3af; text-transform: uppercase; letter-spacing: 0.03em;
+  border-bottom: 1.5px solid #e5e7eb; background-color: #f9fafb;
+}
+.thRight { text-align: right; }
+.td, .tdRight { padding: 11px 8px; font-size: 13px; color: #111; border-bottom: 1px solid #f3f4f6; }
+.tdRight { text-align: right; }
+
+/* ── Summary ── */
+.summaryRows { display: flex; flex-direction: column; }
+.summaryRow { display: flex; justify-content: space-between; font-size: 13.5px; color: #4b5563; padding: 9px 0; border-bottom: 1px solid #f3f4f6; }
+.grandTotal { border-bottom: none; border-top: 2px solid #111; margin-top: 4px; padding-top: 14px; font-size: 16px; font-weight: 700; color: #111; }
+
+/* ── Error ── */
+.errorBox {
+  display: flex; align-items: flex-start; gap: 10px;
+  background-color: #fef2f2; border: 1.5px solid #fecaca;
+  border-radius: 8px; padding: 14px 16px;
+}
+.errorIcon { color: #dc2626; flex-shrink: 0; margin-top: 1px; }
+.errorMsg { font-size: 13px; font-weight: 600; color: #991b1b; margin: 0; }
+.errorSub { font-size: 12px; color: #b91c1c; margin: 2px 0 0; }
+.backBtn {
+  padding: 7px 14px; border-radius: 8px; border: 1.5px solid #e5e7eb;
+  background-color: #fff; color: #374151; font-size: 13px; cursor: pointer; margin-bottom: 12px;
+}
+
+/* ── Print styles ── */
+@media print {
+  .noPrint { display: none !important; }
+  .page    { padding: 0; gap: 14px; }
+  .card    { border: 1px solid #e5e7eb; border-radius: 0; break-inside: avoid; }
+  @page    { margin: 14mm; }
+}

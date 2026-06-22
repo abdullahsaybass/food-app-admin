@@ -42,7 +42,9 @@ export default function DashboardPage() {
 
   const stats = orderStats?.data ?? orderStats ?? {};
   const recentOrders = recentOrdersData?.data ?? recentOrdersData?.orders ?? recentOrdersData ?? [];
- const lowStockProducts = Array.isArray(lowStockData?.data)
+ const lowStockProducts = Array.isArray(lowStockData?.data?.products)
+  ? lowStockData.data.products
+  : Array.isArray(lowStockData?.data)
   ? lowStockData.data
   : Array.isArray(lowStockData?.products)
   ? lowStockData.products
@@ -124,10 +126,10 @@ export default function DashboardPage() {
         <div className="dash-card dash-quick-actions">
           <h2 className="dash-card-title">Quick Actions</h2>
           <div className="dash-actions-grid">
-            <QuickAction icon={<PlusCircleIcon />} label="Add Product" onClick={() => navigate('/products/new')} color="action--green" />
-            <QuickAction icon={<GridIcon />} label="Add Category" onClick={() => navigate('/categories/new')} color="action--orange" />
+            <QuickAction icon={<PlusCircleIcon />} label="Add Product" onClick={() => navigate('/products/add')} color="action--green" />
+            <QuickAction icon={<GridIcon />} label="Add Category" onClick={() => navigate('/categories/add')} color="action--orange" />
             <QuickAction icon={<CartActionIcon />} label="New Order" onClick={() => navigate('/orders')} color="action--blue" />
-            <QuickAction icon={<CouponIcon />} label="Add Coupon" onClick={() => navigate('/coupons')} color="action--purple" />
+            <QuickAction icon={<CouponIcon />} label="Add Coupon" onClick={() => navigate('/coupons/add')} color="action--purple" />
             <QuickAction icon={<AddUserIcon />} label="Add Customer" onClick={() => navigate('/users')} color="action--teal" />
           </div>
         </div>

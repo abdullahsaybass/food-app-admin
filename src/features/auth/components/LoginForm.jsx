@@ -20,8 +20,7 @@ export default function LoginForm() {
   return (
     <form className="login-form" onSubmit={handleSubmit}>
       <div className="lf-logo">
-        <div className="lf-logo-icon">🛒</div>
-        <span className="lf-logo-text">GroceryGo</span>
+        <img src="/src/assets/vfresh.png" alt="VFresh" className="lf-logo-img" />
       </div>
 
       <h1 className="lf-title">Admin Login</h1>
@@ -34,7 +33,7 @@ export default function LoginForm() {
         <input
           type="email"
           name="email"
-          placeholder="admin@grocerygo.com"
+          placeholder="admin@vfresh.shop"
           value={form.email}
           onChange={handleChange}
           required

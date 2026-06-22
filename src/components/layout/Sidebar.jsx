@@ -19,7 +19,7 @@ const NAV_ITEMS = [
         ],
       },
       { to: '/orders',      label: 'Orders',     icon: <OrderIcon />   },
-      { to: '/favourites',  label: 'Favourite',  icon: <FavIcon />     },
+      
       {
         key: 'categories',
         label: 'Categories',
@@ -31,17 +31,13 @@ const NAV_ITEMS = [
         ],
       },
       { to: '/users',       label: 'Users',      icon: <UsersIcon />   },
-      { to: '/messages',    label: 'Message',    icon: <MsgIcon />, badge: 5 },
+      { to: '/banners',     label: 'Banners',    icon: <BannerIcon />  },
+      { to: '/coupons',     label: 'Coupons',    icon: <CouponIcon />  },
+    
       { to: '/invoice',     label: 'Invoice',    icon: <InvoiceIcon /> },
     ],
   },
-  {
-    label: 'Other',
-    links: [
-      { to: '/feedback', label: 'Feedback', icon: <FeedbackIcon /> },
-      { to: '/settings', label: 'Setting',  icon: <SettingIcon />  },
-    ],
-  },
+ 
 ];
 
 export default function Sidebar() {
@@ -98,8 +94,7 @@ export default function Sidebar() {
     <aside className="sidebar">
       {/* Logo */}
       <div className="sidebar-logo">
-        <div className="logo-icon"><CartIcon /></div>
-        <span className="logo-text">GroceryGo</span>
+        <img src="/src/assets/vfresh.png" alt="VFresh" className="logo-img" />
       </div>
 
       {/* Nav sections */}
@@ -282,6 +277,15 @@ function MsgIcon() {
     </svg>
   );
 }
+function BannerIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <circle cx="8.5" cy="10" r="1.5" />
+      <path d="M21 15l-5-5L5 19" />
+    </svg>
+  );
+}
 function InvoiceIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -323,6 +327,14 @@ function ChevronIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  );
+}
+function CouponIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+      <line x1="7" y1="7" x2="7.01" y2="7"/>
     </svg>
   );
 }

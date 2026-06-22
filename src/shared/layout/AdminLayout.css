@@ -13,3 +13,11 @@
   display: flex;
   flex-direction: column;
 }
+
+/* When printing (e.g. the Invoice page's Download/Print button), hide all
+   app chrome — sidebar, scroll containers — and let only the printed
+   content (marked .noPrint-safe by the page itself) flow normally. */
+@media print {
+  .admin-layout { display: block; height: auto; overflow: visible; background: #fff; }
+  .admin-main   { overflow: visible; }
+}
