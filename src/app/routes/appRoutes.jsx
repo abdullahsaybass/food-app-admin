@@ -9,16 +9,17 @@ import DashboardPage from '../../features/dashboard/DashboardPage';
 import ProductListPage from '../../features/product/pages/ProductListPage';
 import AddProductPage from '../../features/product/pages/AddProduct';
 import UsersPage from '../../features/user/pages/UsersPage';
-import OrdersPage      from '../../features/order/pages/OrdersPage';
+import OrdersPage from '../../features/order/pages/OrdersPage';
 import OrderDetailPage from '../../features/order/pages/OrderDetailPage';
 import AllCategoriesPage from '../../features/catergory/pages/AllCategoriesPage';
-import AddCategoryPage   from '../../features/catergory/pages/AddCategoryPage';
-import AllCouponsPage    from '../../features/coupon/pages/AllCouponsPage';
-import AddCouponPage     from '../../features/coupon/pages/AddCouponPage';
-import AllBannersPage    from '../../features/banner/pages/AllBannersPage';
-import InvoicesPage      from '../../features/invoice/pages/InvoicesPage';
+import AddCategoryPage from '../../features/catergory/pages/AddCategoryPage';
+import AllCouponsPage from '../../features/coupon/pages/AllCouponsPage';
+import AddCouponPage from '../../features/coupon/pages/AddCouponPage';
+import AllBannersPage from '../../features/banner/pages/AllBannersPage';
+import InvoicesPage from '../../features/invoice/pages/InvoicesPage';
 import InvoiceDetailPage from '../../features/invoice/pages/InvoiceDetailPage';
 import PrivacyPolicyPage from '../../features/privacy/pages/PrivacyPolicyPage';
+import AccountDeletionPage from '../../features/privacy/pages/AccountDeletionPage';
 
 const router = createBrowserRouter([
   {
@@ -47,9 +48,10 @@ const router = createBrowserRouter([
       { path: 'invoice/:id', element: <InvoiceDetailPage /> },
     ],
   },
-  // Public routes — no AuthGuard, no AdminLayout (no sidebar)
+  // Public routes — no AuthGuard, no AdminLayout
   { path: '/login', element: <LoginPage /> },
   { path: '/privacy-policy', element: <PrivacyPolicyPage /> },
+  { path: '/account-deletion', element: <AccountDeletionPage /> },
   { path: '/unauthorized', element: <div style={{ padding: 40 }}>Not authorized</div> },
   { path: '*', element: <div style={{ padding: 40 }}>404 — Page not found</div> },
 ]);
